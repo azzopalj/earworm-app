@@ -1,0 +1,4 @@
+# GitHub Pages config
+# This ensures the AASA file is served with the correct content type
+include:
+  - .well-known
