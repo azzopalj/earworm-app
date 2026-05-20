@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "6TXY8CB8E5.com.lucasazzopardi.Earworm",
+        "paths": [
+          "/challenge",
+          "/challenge/*"
+        ]
+      }
+    ]
+  }
+}
