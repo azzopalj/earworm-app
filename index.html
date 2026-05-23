@@ -4,40 +4,438 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Earworm — Music Guessing Game</title>
+    <meta name="description" content="How well do you know your music? Guess songs from your library, by genre, decade, or artist. Challenge friends and compete daily.">
+
+    <!-- Open Graph / iMessage link preview -->
+    <meta property="og:title"       content="Earworm — Music Guessing Game">
+    <meta property="og:description" content="How well do you know your music? Play free on iOS.">
+    <meta property="og:image"       content="https://azzopalj.github.io/earworm-app/og-image.png">
+    <meta property="og:url"         content="https://azzopalj.github.io/earworm-app/">
+    <meta property="og:type"        content="website">
+
+    <!-- Twitter card -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       content="Earworm — Music Guessing Game">
+    <meta name="twitter:description" content="How well do you know your music? Play free on iOS.">
+    <meta name="twitter:image"       content="https://azzopalj.github.io/earworm-app/og-image.png">
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --purple: #a855f7;
+            --pink:   #ec4899;
+            --dark1:  #1a1a2e;
+            --dark2:  #0f3460;
+        }
+
         body {
-            background: linear-gradient(135deg, #1a1a2e, #0f3460);
+            background: var(--dark1);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* ── HERO ── */
+        .hero {
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 60px 24px 80px;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -10%, rgba(168,85,247,0.25), transparent),
+                linear-gradient(180deg, var(--dark1) 0%, var(--dark2) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* subtle floating orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        .orb1 { width: 400px; height: 400px; background: var(--purple); top: -100px; left: -100px; }
+        .orb2 { width: 300px; height: 300px; background: var(--pink);   bottom: -80px; right: -80px; }
+
+        .app-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--purple), var(--pink));
+            border-radius: 27px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            color: white;
+            font-size: 56px;
+            margin-bottom: 28px;
+            box-shadow: 0 20px 60px rgba(168,85,247,0.4);
+        }
+
+        .hero h1 {
+            font-size: clamp(42px, 8vw, 72px);
+            font-weight: 900;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.7));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+            line-height: 1.05;
+        }
+
+        .hero .tagline {
+            font-size: clamp(16px, 3vw, 22px);
+            color: rgba(255,255,255,0.6);
+            max-width: 480px;
+            line-height: 1.5;
+            margin-bottom: 40px;
+        }
+
+        .cta-group { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+
+        .btn-appstore {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            color: #000;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 700;
+            padding: 14px 28px;
+            border-radius: 14px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+        }
+        .btn-appstore:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .btn-appstore svg { width: 22px; height: 22px; }
+
+        .free-badge {
+            font-size: 13px;
+            color: rgba(255,255,255,0.45);
+        }
+
+        /* ── MODES ── */
+        .section {
+            padding: 80px 24px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .section-label {
             text-align: center;
-            padding: 40px 20px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--purple);
+            margin-bottom: 12px;
         }
-        .emoji { font-size: 80px; margin-bottom: 20px; }
-        h1 { font-size: 42px; font-weight: 800; margin-bottom: 12px; }
-        p  { font-size: 18px; color: rgba(255,255,255,0.6); max-width: 400px; line-height: 1.6; }
-        .badge {
-            display: inline-block;
-            margin-top: 32px;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 12px;
-            padding: 12px 24px;
+
+        .section h2 {
+            text-align: center;
+            font-size: clamp(28px, 5vw, 42px);
+            font-weight: 800;
+            margin-bottom: 48px;
+            letter-spacing: -1px;
+        }
+
+        .modes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .mode-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 24px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .mode-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(168,85,247,0.3);
+        }
+
+        .mode-icon {
+            font-size: 36px;
+            margin-bottom: 14px;
+        }
+
+        .mode-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .mode-card p {
             font-size: 14px;
-            color: rgba(255,255,255,0.5);
+            color: rgba(255,255,255,0.55);
+            line-height: 1.5;
         }
+
+        .free-tag {
+            display: inline-block;
+            background: rgba(34,197,94,0.15);
+            border: 1px solid rgba(34,197,94,0.3);
+            color: #4ade80;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-top: 10px;
+        }
+
+        /* ── HOW IT WORKS ── */
+        .how-section {
+            padding: 80px 24px;
+            background: rgba(255,255,255,0.02);
+            border-top: 1px solid rgba(255,255,255,0.06);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 32px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .step {
+            text-align: center;
+        }
+
+        .step-num {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, var(--purple), var(--pink));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 800;
+            margin: 0 auto 16px;
+        }
+
+        .step h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+        .step p  { font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.5; }
+
+        /* ── SOCIAL PROOF / FEATURES ── */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .feature {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .feature-icon { font-size: 28px; margin-bottom: 10px; }
+        .feature h3   { font-size: 15px; font-weight: 700; margin-bottom: 5px; }
+        .feature p    { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.5; }
+
+        /* ── FINAL CTA ── */
+        .final-cta {
+            padding: 100px 24px;
+            text-align: center;
+            background: radial-gradient(ellipse 70% 60% at 50% 100%, rgba(168,85,247,0.2), transparent);
+        }
+
+        .final-cta h2 {
+            font-size: clamp(32px, 6vw, 52px);
+            font-weight: 900;
+            letter-spacing: -1.5px;
+            margin-bottom: 16px;
+        }
+
+        .final-cta p {
+            font-size: 18px;
+            color: rgba(255,255,255,0.55);
+            margin-bottom: 40px;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            padding: 32px 24px;
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            font-size: 13px;
+            color: rgba(255,255,255,0.3);
+        }
+
+        footer a {
+            color: rgba(255,255,255,0.45);
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        footer a:hover { color: white; }
     </style>
 </head>
 <body>
-    <div>
-        <div class="emoji">🎵</div>
+
+    <!-- ── HERO ── -->
+    <section class="hero">
+        <div class="orb orb1"></div>
+        <div class="orb orb2"></div>
+
+        <div class="app-icon">🎵</div>
+
         <h1>Earworm</h1>
-        <p>How well do you know your music? Guess songs from your library, by genre, decade, or artist.</p>
-        <div class="badge">Available on iOS — coming soon to the App Store</div>
-    </div>
+        <p class="tagline">The music guessing game that tests how well you really know your favourite songs.</p>
+
+        <div class="cta-group">
+            <a href="https://apps.apple.com/app/id6771565392" class="btn-appstore">
+                <!-- Apple logo SVG -->
+                <svg viewBox="0 0 814 1000" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-37.5-155.5-127.4C46.3 790.7 0 663 0 541.8c0-207.4 135.4-316.8 268.1-316.8 36.2 0 92.7 12.8 125.3 12.8 31.2 0 90.2-15.4 135.2-15.4 47.8 0 178.3 6.4 251.3 133.5zM548.6 71.9C568.6 43.2 585.8 3.2 585.8 0c0-.6-.6-1.3-1.9-1.3-1.9 0-58.8 21.3-87.2 63.5-22.4 33.9-44.1 82.6-38.3 119.3.7.6 1.9 1.9 3.2 1.9 1.9 0 60.2-21.3 87.1-111.5z"/>
+                </svg>
+                Download on the App Store
+            </a>
+            <span class="free-badge">Free to play · iOS 16+</span>
+        </div>
+    </section>
+
+    <!-- ── GAME MODES ── -->
+    <section class="section">
+        <p class="section-label">Game Modes</p>
+        <h2>How do you want to play?</h2>
+
+        <div class="modes-grid">
+            <div class="mode-card">
+                <div class="mode-icon">🎧</div>
+                <h3>My Library</h3>
+                <p>Guess songs from your own Apple Music library. The ultimate test of your personal taste.</p>
+                <span class="free-tag">FREE</span>
+            </div>
+            <div class="mode-card">
+                <div class="mode-icon">🎸</div>
+                <h3>Genre Gauntlet</h3>
+                <p>Pick a genre — Pop, Hip-Hop, Rock, Country and more — and guess songs from Apple Music's charts.</p>
+                <span class="free-tag">FREE</span>
+            </div>
+            <div class="mode-card">
+                <div class="mode-icon">📅</div>
+                <h3>Decades Dash</h3>
+                <p>Travel through time from the 60s to today. How well do you know music history?</p>
+            </div>
+            <div class="mode-card">
+                <div class="mode-icon">🎤</div>
+                <h3>Artist Spotlight</h3>
+                <p>Deep dive into one artist's catalog. 100+ artists across 7 categories including Rock, Rap, R&B, Country and Latin.</p>
+            </div>
+            <div class="mode-card">
+                <div class="mode-icon">⭐️</div>
+                <h3>Daily Challenge</h3>
+                <p>5 new songs every day. Everyone plays the same songs — compare your score with friends.</p>
+                <span class="free-tag">FREE</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── HOW IT WORKS ── -->
+    <section class="how-section">
+        <div style="max-width: 1000px; margin: 0 auto;">
+            <p class="section-label" style="text-align:center;">How It Works</p>
+            <h2 style="text-align:center; font-size: clamp(28px, 5vw, 42px); font-weight: 800; margin-bottom: 48px; letter-spacing: -1px;">Simple to play, hard to master</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <h3>Listen</h3>
+                    <p>A 30-second preview plays. Listen carefully — every second counts.</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <h3>Guess</h3>
+                    <p>Pick the right song from 4 choices before the timer runs out.</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <h3>Score</h3>
+                    <p>Faster answers earn more points. Build a streak to multiply your score.</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <h3>Challenge</h3>
+                    <p>Share your score and challenge friends to beat you on the same songs.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── FEATURES ── -->
+    <section class="section">
+        <p class="section-label">Features</p>
+        <h2>Everything a music lover needs</h2>
+
+        <div class="features-grid">
+            <div class="feature">
+                <div class="feature-icon">🏆</div>
+                <h3>Achievements</h3>
+                <p>20 Game Center achievements to unlock as you play and improve.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🎯</div>
+                <h3>Friend Challenges</h3>
+                <p>Send a challenge link. Your friend plays the exact same songs and you compare scores.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <h3>Stats & History</h3>
+                <p>Track your accuracy, best scores, and streaks over time.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📤</div>
+                <h3>Score Cards</h3>
+                <p>Generate a shareable score card image to post on social media.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔔</div>
+                <h3>Daily Reminders</h3>
+                <p>Optional notification so you never miss the daily challenge.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🎵</div>
+                <h3>Powered by Apple Music</h3>
+                <p>Millions of songs, real previews, beautiful artwork. No extra subscription needed.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── FINAL CTA ── -->
+    <section class="final-cta">
+        <h2>Ready to test your music knowledge?</h2>
+        <p>Free to download. No account required.</p>
+        <a href="https://apps.apple.com/app/id6771565392" class="btn-appstore">
+            <svg viewBox="0 0 814 1000" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-37.5-155.5-127.4C46.3 790.7 0 663 0 541.8c0-207.4 135.4-316.8 268.1-316.8 36.2 0 92.7 12.8 125.3 12.8 31.2 0 90.2-15.4 135.2-15.4 47.8 0 178.3 6.4 251.3 133.5zM548.6 71.9C568.6 43.2 585.8 3.2 585.8 0c0-.6-.6-1.3-1.9-1.3-1.9 0-58.8 21.3-87.2 63.5-22.4 33.9-44.1 82.6-38.3 119.3.7.6 1.9 1.9 3.2 1.9 1.9 0 60.2-21.3 87.1-111.5z"/>
+            </svg>
+            Download on the App Store
+        </a>
+    </section>
+
+    <!-- ── FOOTER ── -->
+    <footer>
+        <p>
+            © 2026 Lucas Azzopardi &nbsp;·&nbsp;
+            <a href="https://apps.apple.com/app/id6771565392">App Store</a>
+            <a href="https://azzopalj.github.io/earworm-app/privacy.html">Privacy Policy</a>
+            <a href="mailto:privacy@earworm.app">Contact</a>
+        </p>
+    </footer>
+
 </body>
 </html>
